@@ -4,119 +4,121 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Government Budget Tracker</title>
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f6fa;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #2c3e50;
-      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ece9e6, #ffffff);
       padding: 20px;
-      text-align: center;
     }
-    header h1 {
-      margin: 0;
-    }
+
     .container {
       max-width: 800px;
-      margin: 30px auto;
+      margin: auto;
       background: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-    h2 {
+
+    h1 {
+      text-align: center;
       color: #2c3e50;
-      margin-bottom: 10px;
     }
+
+    .section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+
+    .section h2 {
+      margin-bottom: 10px;
+      color: #34495e;
+    }
+
     label {
       font-weight: bold;
-      display: block;
-      margin-top: 10px;
     }
+
     input {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
-      border-radius: 5px;
+      margin-bottom: 15px;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
+
     button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 15px;
+      padding: 10px 20px;
       border: none;
-      border-radius: 5px;
-      font-size: 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      color: white;
       cursor: pointer;
     }
-    .connect-btn {
-      background-color: #34495e;
-      color: white;
-    }
-    .allocate-btn {
-      background-color: #27ae60;
-      color: white;
-    }
-    .spend-btn {
-      background-color: #2980b9;
-      color: white;
-    }
-    .status-btn {
-      background-color: #16a085;
-      color: white;
-    }
-    .status {
-      margin-top: 10px;
-      background: #ecf0f1;
-      padding: 10px;
-      border-radius: 5px;
+
+    .btn-green { background-color: #27ae60; }
+    .btn-blue { background-color: #2980b9; }
+    .btn-cyan { background-color: #16a085; }
+    .btn-grey { background-color: #7f8c8d; }
+
+    .connected {
+      color: green;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>🏛️ Government Budget Tracker</h1>
+    <p style="text-align:center;">Transparent blockchain-based budget management system</p>
 
-<header>
-  <h1>🏛️ Government Budget Tracker</h1>
-  <p>Transparent blockchain-based budget management system</p>
-</header>
+    <!-- Wallet Connection -->
+    <div class="section">
+      <button onclick="connectWallet()">Connect Wallet</button>
+      <p><strong>Connected Wallet:</strong> <span id="walletAddress">Not connected</span></p>
+      <p>Status: <span id="walletStatus" class="connected">Disconnected</span></p>
+    </div>
 
-<div class="container">
-  <button class="connect-btn" onclick="connectWallet()">Connect Wallet</button>
-  <p id="walletAddress">Not connected</p>
+    <!-- Allocate Budget -->
+    <div class="section">
+      <h2>💰 Allocate Budget</h2>
+      <label>Department ID:</label>
+      <input type="text" id="allocateDeptId" placeholder="e.g., dept1" />
+      <label>Budget Amount (ETH):</label>
+      <input type="number" id="allocateAmount" placeholder="e.g., 0.01" />
+      <button class="btn-green" onclick="allocateBudget()">Allocate Budget</button>
+    </div>
 
-  <h2>💰 Allocate Budget</h2>
-  <label>Department ID:</label>
-  <input id="allocDeptId" placeholder="e.g., dep1"/>
-  <label>Budget Amount (ETH):</label>
-  <input id="allocAmount" placeholder="e.g., 0.005"/>
-  <label>Wallet Address:</label>
-  <input id="allocWallet" placeholder="0x..." />
-  <button class="allocate-btn" onclick="allocateBudget()">Allocate Budget</button>
+    <!-- Spend Budget -->
+    <div class="section">
+      <h2>💸 Spend Budget</h2>
+      <label>Department ID:</label>
+      <input type="text" id="spendDeptId" placeholder="e.g., dept1" />
+      <label>Spend Amount (ETH):</label>
+      <input type="number" id="spendAmount" placeholder="e.g., 0.005" />
+      <button class="btn-blue" onclick="spendFunds()">Spend Budget</button>
+    </div>
 
-  <h2>💳 Spend Budget</h2>
-  <label>Department ID:</label>
-  <input id="spendDeptId" placeholder="e.g., dep1"/>
-  <label>Spend Amount (ETH):</label>
-  <input id="spendAmount" placeholder="e.g., 0.001"/>
-  <button class="spend-btn" onclick="spendBudget()">Spend Budget</button>
+    <!-- Check Status -->
+    <div class="section">
+      <h2>✅ Check Department Status</h2>
+      <label>Department ID:</label>
+      <input type="text" id="statusDeptId" placeholder="e.g., dept1" />
+      <button class="btn-cyan" onclick="checkStatus()">Get Status</button>
+      <p><strong>Remaining Budget:</strong> <span id="remainingBudget">-</span> ETH</p>
+    </div>
+  </div>
 
-  <h2>📝 Check Department Status</h2>
-  <label>Department ID:</label>
-  <input id="statusDeptId" placeholder="e.g., dep1"/>
-  <button class="status-btn" onclick="getStatus()">Get Status</button>
-  <div class="status" id="deptStatus"></div>
-</div>
+  <script>
+    let web3;
+    let contract;
 
-<script>
-  let web3;
-  let contract;
-  const contractAddress = "0x882e81b3278BAfcF446DfA24a3A8577b07fB7dE9"; // Replace with your Remix deployed address
-  const abi =[
+    const contractAddress = "0x882e81b3278BAfcF446DfA24a3A8577b07fB7dE9"; // Replace this
+    const contractABI =[
 	{
 		"inputs": [
 			{
@@ -282,52 +284,41 @@
 		"stateMutability": "view",
 		"type": "function"
 	}
-]; 
-
-  async function connectWallet() {
-    if (window.ethereum) {
-      web3 = new Web3(window.ethereum);
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const accounts = await web3.eth.getAccounts();
-      document.getElementById("walletAddress").innerText = "Connected: " + accounts[0];
-      contract = new web3.eth.Contract(abi, contractAddress);
-    } else {
-      alert("MetaMask not found. Please install it.");
+];
+    async function connectWallet() {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await web3.eth.getAccounts();
+        document.getElementById('walletAddress').innerText = accounts[0];
+        document.getElementById('walletStatus').innerText = "Connected";
+        contract = new web3.eth.Contract(contractABI, contractAddress);
+      } else {
+        alert("Please install MetaMask.");
+      }
     }
-  }
 
-  async function allocateBudget() {
-    const deptId = document.getElementById("allocDeptId").value;
-    const amount = document.getElementById("allocAmount").value;
-    const wallet = document.getElementById("allocWallet").value;
-    const accounts = await web3.eth.getAccounts();
+    async function allocateBudget() {
+      const deptId = document.getElementById('allocateDeptId').value;
+      const amount = web3.utils.toWei(document.getElementById('allocateAmount').value, 'ether');
+      const accounts = await web3.eth.getAccounts();
+      await contract.methods.allocateBudget(deptId, amount).send({ from: accounts[0] });
+      alert('Budget Allocated!');
+    }
 
-    await contract.methods.allocateBudget(deptId, wallet).send({
-      from: accounts[0],
-      value: web3.utils.toWei(amount, "ether")
-    });
+    async function spendFunds() {
+      const deptId = document.getElementById('spendDeptId').value;
+      const amount = web3.utils.toWei(document.getElementById('spendAmount').value, 'ether');
+      const accounts = await web3.eth.getAccounts();
+      await contract.methods.spendFunds(deptId, amount).send({ from: accounts[0] });
+      alert('Funds Spent!');
+    }
 
-    alert("Budget allocated successfully.");
-  }
-
-  async function spendBudget() {
-    const deptId = document.getElementById("spendDeptId").value;
-    const amount = document.getElementById("spendAmount").value;
-    const accounts = await web3.eth.getAccounts();
-
-    await contract.methods.spendBudget(deptId, web3.utils.toWei(amount, "ether")).send({
-      from: accounts[0]
-    });
-
-    alert("Budget spent successfully.");
-  }
-
-  async function getStatus() {
-    const deptId = document.getElementById("statusDeptId").value;
-    const status = await contract.methods.getSpentAmount(deptId).call();
-    document.getElementById("deptStatus").innerText = `Spent: ${web3.utils.fromWei(status, "ether")} ETH`;
-  }
-</script>
-
+    async function checkStatus() {
+      const deptId = document.getElementById('statusDeptId').value;
+      const remaining = await contract.methods.auditBudget(deptId).call();
+      document.getElementById('remainingBudget').innerText = web3.utils.fromWei(remaining, 'ether');
+    }
+  </script>
 </body>
 </html>
