@@ -3,131 +3,120 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gov Budget Tracker</title>
-  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <title>Government Budget Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
+      background: #f4f6fa;
       margin: 0;
-      background-color: #f5f7fa;
+      padding: 0;
     }
-    .navbar {
-      background-color: #0a6eff;
+    header {
+      background: #2c3e50;
       color: white;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 20px;
+      text-align: center;
     }
-    .tabs {
-      margin: 20px;
+    header h1 {
+      margin: 0;
     }
-    .role-tabs button {
-      border: 1px solid #ddd;
-      padding: 8px 16px;
-      margin-right: 5px;
-      border-radius: 5px;
-      background-color: white;
-      cursor: pointer;
+    .container {
+      max-width: 800px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    .role-tabs button.active {
-      border: 1px solid #0a6eff;
-      color: #0a6eff;
+    h2 {
+      color: #2c3e50;
+      margin-bottom: 10px;
     }
-    .tab-menu {
-      margin-top: 20px;
-    }
-    .tab-menu button {
-      background: none;
-      border: none;
+    label {
       font-weight: bold;
-      margin-right: 20px;
-      cursor: pointer;
-      color: #0a6eff;
+      display: block;
+      margin-top: 10px;
     }
-    .table {
+    input {
       width: 100%;
-      margin-top: 15px;
-      border-collapse: collapse;
-    }
-    .table th, .table td {
-      border: 1px solid #ccc;
       padding: 8px;
-      text-align: left;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
-    #connectBtn {
-      background: transparent;
-      border: 1px solid white;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
       cursor: pointer;
     }
-    .section {
-      margin: 20px;
+    .connect-btn {
+      background-color: #34495e;
+      color: white;
+    }
+    .allocate-btn {
+      background-color: #27ae60;
+      color: white;
+    }
+    .spend-btn {
+      background-color: #2980b9;
+      color: white;
+    }
+    .status-btn {
+      background-color: #16a085;
+      color: white;
+    }
+    .status {
+      margin-top: 10px;
+      background: #ecf0f1;
+      padding: 10px;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <div class="navbar">
-    <div><strong>Gov Budget Tracker</strong></div>
-    <button id="connectBtn">Connect Wallet</button>
-  </div>
 
-  <div class="tabs">
-    <div class="role-tabs">
-      <button class="active">Central</button>
-      <button>Department</button>
-      <button>Validator</button>
-    </div>
+<header>
+  <h1>🏛️ Government Budget Tracker</h1>
+  <p>Transparent blockchain-based budget management system</p>
+</header>
 
-    <div class="tab-menu">
-      <button>Departments</button>
-      <button>Allocate Funds</button>
-      <button>Deploy Department Branch</button>
-    </div>
-  </div>
+<div class="container">
+  <button class="connect-btn" onclick="connectWallet()">Connect Wallet</button>
+  <p id="walletAddress">Not connected</p>
 
-  <div class="section">
-    <h3>Departments</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Department ID</th>
-          <th>Name</th>
-          <th>Balance</th>
-        </tr>
-      </thead>
-      <tbody id="departmentsTable">
-        <!-- Dynamic Rows -->
-      </tbody>
-    </table>
-  </div>
+  <h2>💰 Allocate Budget</h2>
+  <label>Department ID:</label>
+  <input id="allocDeptId" placeholder="e.g., dep1"/>
+  <label>Budget Amount (ETH):</label>
+  <input id="allocAmount" placeholder="e.g., 0.005"/>
+  <label>Wallet Address:</label>
+  <input id="allocWallet" placeholder="0x..." />
+  <button class="allocate-btn" onclick="allocateBudget()">Allocate Budget</button>
 
-  <div class="section">
-    <h3>All Fund Allocation Transactions (Real-time)</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Sender</th>
-          <th>Receiver (DeptID)</th>
-          <th>Amount (ETH)</th>
-          <th>Timestamp</th>
-        </tr>
-      </thead>
-      <tbody id="transactionsTable">
-        <!-- Dynamic Transactions -->
-      </tbody>
-    </table>
-  </div>
+  <h2>💳 Spend Budget</h2>
+  <label>Department ID:</label>
+  <input id="spendDeptId" placeholder="e.g., dep1"/>
+  <label>Spend Amount (ETH):</label>
+  <input id="spendAmount" placeholder="e.g., 0.001"/>
+  <button class="spend-btn" onclick="spendBudget()">Spend Budget</button>
 
-  <script>
-    let web3;
-    let contract;
-    let account;
+  <h2>📝 Check Department Status</h2>
+  <label>Department ID:</label>
+  <input id="statusDeptId" placeholder="e.g., dep1"/>
+  <button class="status-btn" onclick="getStatus()">Get Status</button>
+  <div class="status" id="deptStatus"></div>
+</div>
 
-    const contractAddress = "0x882e81b3278BAfcF446DfA24a3A8577b07fB7dE9"; // Replace with your contract
-    const contractABI = [[
+<script>
+  let web3;
+  let contract;
+  const contractAddress = "0x882e81b3278BAfcF446DfA24a3A8577b07fB7dE9"; // Replace with your Remix deployed address
+  const abi =[
 	{
 		"inputs": [
 			{
@@ -293,50 +282,52 @@
 		"stateMutability": "view",
 		"type": "function"
 	}
-]]; // Add ABI here
+]; 
 
-    document.getElementById("connectBtn").onclick = async () => {
-      if (window.ethereum) {
-        web3 = new Web3(window.ethereum);
-        await window.ethereum.enable();
-        const accounts = await web3.eth.getAccounts();
-        account = accounts[0];
-        document.getElementById("connectBtn").innerText = account.slice(0, 6) + '...' + account.slice(-4);
-        contract = new web3.eth.Contract(contractABI, contractAddress);
-        console.log("Connected account:", account);
-        // You can call fetch functions here
-      } else {
-        alert("Please install MetaMask");
-      }
-    };
+  async function connectWallet() {
+    if (window.ethereum) {
+      web3 = new Web3(window.ethereum);
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const accounts = await web3.eth.getAccounts();
+      document.getElementById("walletAddress").innerText = "Connected: " + accounts[0];
+      contract = new web3.eth.Contract(abi, contractAddress);
+    } else {
+      alert("MetaMask not found. Please install it.");
+    }
+  }
 
-    // Add logic to dynamically populate department and transaction tables
-    // Example function placeholders:
-    /*
-    async function loadDepartments() {
-      const data = await contract.methods.getDepartments().call();
-      const table = document.getElementById("departmentsTable");
-      table.innerHTML = "";
-      data.forEach(dept => {
-        table.innerHTML += `<tr><td>${dept.id}</td><td>${dept.name}</td><td>${web3.utils.fromWei(dept.balance, "ether")}</td></tr>`;
-      });
-    }
-    
-    async function loadTransactions() {
-      const txs = await contract.getPastEvents('FundsAllocated', { fromBlock: 0, toBlock: 'latest' });
-      const table = document.getElementById("transactionsTable");
-      table.innerHTML = "";
-      txs.forEach(tx => {
-        const { sender, receiver, amount, timestamp } = tx.returnValues;
-        table.innerHTML += `<tr>
-          <td>${sender}</td>
-          <td>${receiver}</td>
-          <td>${web3.utils.fromWei(amount, 'ether')}</td>
-          <td>${new Date(timestamp * 1000).toLocaleString()}</td>
-        </tr>`;
-      });
-    }
-    */
-  </script>
+  async function allocateBudget() {
+    const deptId = document.getElementById("allocDeptId").value;
+    const amount = document.getElementById("allocAmount").value;
+    const wallet = document.getElementById("allocWallet").value;
+    const accounts = await web3.eth.getAccounts();
+
+    await contract.methods.allocateBudget(deptId, wallet).send({
+      from: accounts[0],
+      value: web3.utils.toWei(amount, "ether")
+    });
+
+    alert("Budget allocated successfully.");
+  }
+
+  async function spendBudget() {
+    const deptId = document.getElementById("spendDeptId").value;
+    const amount = document.getElementById("spendAmount").value;
+    const accounts = await web3.eth.getAccounts();
+
+    await contract.methods.spendBudget(deptId, web3.utils.toWei(amount, "ether")).send({
+      from: accounts[0]
+    });
+
+    alert("Budget spent successfully.");
+  }
+
+  async function getStatus() {
+    const deptId = document.getElementById("statusDeptId").value;
+    const status = await contract.methods.getSpentAmount(deptId).call();
+    document.getElementById("deptStatus").innerText = `Spent: ${web3.utils.fromWei(status, "ether")} ETH`;
+  }
+</script>
+
 </body>
 </html>
