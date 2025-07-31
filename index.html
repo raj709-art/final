@@ -3,76 +3,122 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Government Spending Tracker</title>
+  <title>Gov Budget Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #eef2f7;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background-color: #f5f7fa;
     }
-    .container {
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      color: #333;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin: 5px 0 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      background-color: #007BFF;
+    .navbar {
+      background-color: #0a6eff;
       color: white;
-      border: none;
-      font-weight: bold;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tabs {
+      margin: 20px;
+    }
+    .role-tabs button {
+      border: 1px solid #ddd;
+      padding: 8px 16px;
+      margin-right: 5px;
+      border-radius: 5px;
+      background-color: white;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #0056b3;
+    .role-tabs button.active {
+      border: 1px solid #0a6eff;
+      color: #0a6eff;
     }
-    #status {
-      color: green;
+    .tab-menu {
+      margin-top: 20px;
+    }
+    .tab-menu button {
+      background: none;
+      border: none;
       font-weight: bold;
+      margin-right: 20px;
+      cursor: pointer;
+      color: #0a6eff;
+    }
+    .table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+    }
+    .table th, .table td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    #connectBtn {
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .section {
+      margin: 20px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Transparent Government Spending Tracker</h1>
-    <button id="connectBtn">Connect MetaMask</button>
-    <p>Connected Account: <span id="account">Not Connected</span></p>
+  <div class="navbar">
+    <div><strong>Gov Budget Tracker</strong></div>
+    <button id="connectBtn">Connect Wallet</button>
+  </div>
 
-    <section>
-      <h2>Allocate Budget (Admin Only)</h2>
-      <input id="allocDept" placeholder="Department ID" />
-      <input id="allocAmount" placeholder="Amount in Wei" type="number" />
-      <button onclick="allocateBudget()">Allocate</button>
-    </section>
+  <div class="tabs">
+    <div class="role-tabs">
+      <button class="active">Central</button>
+      <button>Department</button>
+      <button>Validator</button>
+    </div>
 
-    <section>
-      <h2>Spend Funds</h2>
-      <input id="spendDept" placeholder="Department ID" />
-      <input id="spendAmount" placeholder="Amount in Wei" type="number" />
-      <button onclick="spendFunds()">Spend</button>
-    </section>
+    <div class="tab-menu">
+      <button>Departments</button>
+      <button>Allocate Funds</button>
+      <button>Deploy Department Branch</button>
+    </div>
+  </div>
 
-    <section>
-      <h2>Audit Budget</h2>
-      <input id="auditDept" placeholder="Department ID" />
-      <button onclick="auditBudget()">Audit</button>
-      <p id="auditResult"></p>
-    </section>
+  <div class="section">
+    <h3>Departments</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Department ID</th>
+          <th>Name</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody id="departmentsTable">
+        <!-- Dynamic Rows -->
+      </tbody>
+    </table>
+  </div>
 
-    <p id="status"></p>
+  <div class="section">
+    <h3>All Fund Allocation Transactions (Real-time)</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Sender</th>
+          <th>Receiver (DeptID)</th>
+          <th>Amount (ETH)</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody id="transactionsTable">
+        <!-- Dynamic Transactions -->
+      </tbody>
+    </table>
   </div>
 
   <script>
@@ -80,8 +126,8 @@
     let contract;
     let account;
 
-    const contractAddress = "0x882e81b3278BAfcF446DfA24a3A8577b07fB7dE9"; // Replace with your actual contract address
-    const contractABI =[
+    const contractAddress = "0x882e81b3278BAfcF446DfA24a3A8577b07fB7dE9"; // Replace with your contract
+    const contractABI = [[
 	{
 		"inputs": [
 			{
@@ -247,7 +293,7 @@
 		"stateMutability": "view",
 		"type": "function"
 	}
-];
+]]; // Add ABI here
 
     document.getElementById("connectBtn").onclick = async () => {
       if (window.ethereum) {
@@ -255,53 +301,42 @@
         await window.ethereum.enable();
         const accounts = await web3.eth.getAccounts();
         account = accounts[0];
-        document.getElementById("account").innerText = account;
+        document.getElementById("connectBtn").innerText = account.slice(0, 6) + '...' + account.slice(-4);
         contract = new web3.eth.Contract(contractABI, contractAddress);
-        setStatus("MetaMask connected");
+        console.log("Connected account:", account);
+        // You can call fetch functions here
       } else {
-        alert("MetaMask not detected");
+        alert("Please install MetaMask");
       }
     };
 
-    function setStatus(msg) {
-      document.getElementById("status").innerText = msg;
+    // Add logic to dynamically populate department and transaction tables
+    // Example function placeholders:
+    /*
+    async function loadDepartments() {
+      const data = await contract.methods.getDepartments().call();
+      const table = document.getElementById("departmentsTable");
+      table.innerHTML = "";
+      data.forEach(dept => {
+        table.innerHTML += `<tr><td>${dept.id}</td><td>${dept.name}</td><td>${web3.utils.fromWei(dept.balance, "ether")}</td></tr>`;
+      });
     }
-
-    async function allocateBudget() {
-      const dept = document.getElementById("allocDept").value;
-      const amount = document.getElementById("allocAmount").value;
-      try {
-        await contract.methods.allocateBudget(dept, amount).send({ from: account });
-        setStatus(`Budget allocated to ${dept}`);
-      } catch (e) {
-        setStatus("Error allocating budget");
-        console.error(e);
-      }
+    
+    async function loadTransactions() {
+      const txs = await contract.getPastEvents('FundsAllocated', { fromBlock: 0, toBlock: 'latest' });
+      const table = document.getElementById("transactionsTable");
+      table.innerHTML = "";
+      txs.forEach(tx => {
+        const { sender, receiver, amount, timestamp } = tx.returnValues;
+        table.innerHTML += `<tr>
+          <td>${sender}</td>
+          <td>${receiver}</td>
+          <td>${web3.utils.fromWei(amount, 'ether')}</td>
+          <td>${new Date(timestamp * 1000).toLocaleString()}</td>
+        </tr>`;
+      });
     }
-
-    async function spendFunds() {
-      const dept = document.getElementById("spendDept").value;
-      const amount = document.getElementById("spendAmount").value;
-      try {
-        await contract.methods.spendFunds(dept, amount).send({ from: account });
-        setStatus(`Spent ${amount} from ${dept}`);
-      } catch (e) {
-        setStatus("Error spending funds");
-        console.error(e);
-      }
-    }
-
-    async function auditBudget() {
-      const dept = document.getElementById("auditDept").value;
-      try {
-        const remaining = await contract.methods.auditBudget(dept).call({ from: account });
-        document.getElementById("auditResult").innerText = `Remaining Budget: ${remaining} wei`;
-        setStatus("Audit successful");
-      } catch (e) {
-        setStatus("Audit failed");
-        console.error(e);
-      }
-    }
+    */
   </script>
 </body>
 </html>
